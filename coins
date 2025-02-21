@@ -91,7 +91,7 @@ int main() {
             userColumnInt = stoi(userColumnStr);
             userRawInt = stoi(userRowStr);
 
-            //clear the list grid
+            //clear the last grid
             #ifdef _WIN32
                 system("cls");
             #else
