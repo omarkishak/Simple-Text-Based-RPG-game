@@ -91,7 +91,13 @@ int main() {
             userColumnInt = stoi(userColumnStr);
             userRawInt = stoi(userRowStr);
 
-            system("clear"); //<= Clear the last grid
+            //clear the list grid
+            #ifdef _WIN32
+                system("cls");
+            #else
+                system("clear");
+            #endif
+
             if(grid[userRawInt-1][userColumnInt-1] == '#'){
                 cout << "\n****This place is already taken****\n\n";
             }else{
@@ -102,13 +108,22 @@ int main() {
                 mt19937 gen(rd());
                 uniform_int_distribution<int> range(1,100);
 
-                if(range(rd) < 25 /*نسبة ظهور العملات 25 في المئة, هذا مجرد رقم في الأول*/){
-                    coins+=1;
-                    cout << "\n****You Got A Coin!****\n\n";
+                if(range(gen) < 25 /*نسبة ظهور العملات 25 في المئة, هذا مجرد رقم في الأول*/){
+                    int bouns = (range(gen) % 11);
+                    coins+= bouns;
+                    if(bouns > 1){
+                        cout << "\n****You Got " << bouns << " Coins!****\n\n";
+                    }else if(bouns == 1){
+                        cout << "\n****You Got A Coin!****\n\n";
+                    }
                 }
             }
         }else{
-            system("clear");
+            #ifdef _WIN32
+                system("cls");
+            #else
+                system("clear");
+            #endif
         }
     }
 
