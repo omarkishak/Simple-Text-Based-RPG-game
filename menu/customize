@@ -1,0 +1,211 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <random>
+
+using namespace std;
+
+bool chkUserInput(const string& userInput) {
+    int number;
+    char extra;
+    istringstream iss(userInput);
+    if (!(iss >> number) || (iss >> extra)) {
+        return false;
+    }
+    return true;
+}
+
+bool chkUserRowInput(const string& userInput,int &row) {
+    int number;
+    char extra;
+    istringstream iss(userInput);
+    if (!(iss >> number) || (iss >> extra)) {
+        return false;
+    }
+    return (number >= 1 && number <= row);
+}
+
+bool chkUserColumnInput(const string& userInput,int &column) {
+    int number;
+    char extra;
+    istringstream iss(userInput);
+    if (!(iss >> number) || (iss >> extra)) {
+        return false;
+    }
+    return (number >= 1 && number <= column);
+}
+
+// Check if player won or not;
+bool isDone(vector<vector<char>>&grid,int &row,int &column){
+    int counter=0;
+
+    for(int i=0;i<row;i++){
+        for(int j=0;j<column;j++){
+            if(grid[i][j] == '#'){
+                counter +=1;
+            }
+        }
+    }
+
+    return counter == row * column;
+}
+
+void displayInv(int &health,int &shield,int &coins,int &inventorySize){
+    char inventory[inventorySize]= {' ', ' ', ' '};
+    cout << "Health: " << health << "  |  " << "shield" << ": " << shield <<  "  |  " << "coins" << ": " << coins << '\n';
+    cout << "Inventory: { " << inventory[0] << " | " << inventory[1] << " | " << inventory[2] << " }\n";
+}
+
+
+int main() {
+    int row, column, coinsProb, coordinates = 1, userRawInt = 0, userColumnInt = 0;
+
+    string input;
+
+    cout << "Enter the number of columns \n";
+    while (true){
+        getline(cin,input);
+        if(chkUserInput(input)){
+            column = stoi(input);
+            break;
+        }else{
+            cout << "Wrong input,try again.\n";
+        }
+    }
+    cout << "Enter the number of rows \n";
+    while (true){
+        getline(cin,input);
+        if(chkUserInput(input)){
+            row = stoi(input);
+            break;
+        }else{
+            cout << "Wrong input,try again.\n";
+        }
+    }
+    cout << "Enter the probability of appearance of coins\n";
+    while (true){
+        getline(cin,input);
+        if(chkUserInput(input)){
+            coinsProb = stoi(input);
+            break;
+        }else{
+            cout << "Wrong input,try again.\n";
+        }
+    }
+    
+    cout << "\033[2J\033[1;1H";
+
+    int horizontal = (column * 4) + 3;
+
+    // to make the grid more flexiable and be able to resize in any other level.
+    vector<vector<char>> grid(row,vector<char>(column,' ')); 
+
+    string userColumnStr, userRowStr;
+
+    int health = 100, shield = 50, coins = 0, inventorySize = 3, inventoryCentringSpace = 12; // <= HotBar Items
+
+    //randomize the [coins, items, enemies, ...etc]
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> range(1,100);
+
+    while (true) {
+        int bouns = (range(gen) % 11);
+
+        for (int i = 0; i < row; i++) {
+            if (i == 0) {
+                cout << " ";
+                for (int j = 0; j < column; j++) {
+                    if (j == 0) {
+                        cout << " | ";
+                    }
+                    cout << coordinates++;
+                    cout << " | ";
+                }
+                cout << '\n';
+
+                for (int j = 0; j < horizontal; j++) {
+                    cout << '-';
+                }
+                cout << '\n';
+
+                coordinates = 1;
+            }
+
+            cout << coordinates++;
+
+            for (int j = 0; j < column; j++) {
+                if (j == 0) {
+                    cout << " | ";
+                }
+                cout << grid[i][j];
+                cout << " | ";
+
+            }
+            cout << '\n';
+
+            for (int j = 0; j < horizontal; j++) {
+                cout << '-';
+            }
+            cout << '\n';
+        }
+
+        coordinates = 1;
+        cout << '\n';
+
+        displayInv(health,shield,coins,inventorySize);
+        cout << "* Enter then number of the desired column followed by the row to move: " << endl;
+
+        getline(cin, userColumnStr);
+        getline(cin, userRowStr);
+        
+        if(chkUserColumnInput(userColumnStr,column) && chkUserRowInput(userRowStr,row)) {
+            userColumnInt = stoi(userColumnStr);
+            userRawInt = stoi(userRowStr);
+            
+            //clear the list grid
+            cout << "\033[2J\033[1;1H";
+            if(grid[userRawInt-1][userColumnInt-1] == '#'){
+                cout << "\n****This place is already taken****\n\n";
+            }else{
+                grid[userRawInt - 1][userColumnInt - 1] = '#';
+
+                if(range(gen) <= coinsProb){
+                    coins+= bouns;
+                    if(bouns > 1){
+                        cout << "\n****You Got " << bouns << " Coins!****\n\n";
+                    }else if(bouns == 1){
+                        cout << "\n****You Got A Coin!****\n\n";
+                    }
+                }
+            }
+        }else{
+            cout << "\033[2J\033[1;1H";
+        }
+
+        if(isDone(grid,row,column)){
+            cout << "\033[2J\033[1;1H";
+
+            if(bouns > 1){
+                cout << "\n****You Got " << bouns << " Coins!****\n\n";
+            }else if(bouns == 1){
+                cout << "\n****You Got A Coin!****\n\n";
+            }
+
+            cout << "Great job, \033[32mYOU WON!\033[0m" << endl;
+            cout << "======\n";
+            cout << "Stats: " << endl;
+            displayInv(health,shield,coins,inventorySize);
+            cout << "======\n";
+            #ifdef _WIN32
+                system("menu.exe");
+            #else
+                system("./menu");
+            #endif
+
+            break;
+        }
+    }
+
+    return 0;
+}
