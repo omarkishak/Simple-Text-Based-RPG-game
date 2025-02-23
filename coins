@@ -128,6 +128,7 @@ int main() {
             cout << "\033[2J\033[1;1H";
 
             cout << "Great job, \033[32mYOU WON!\033[0m" << endl;
+            cout << "======\n";
             cout << "Stats: " << endl;
             displayInv(health,shield,coins,inventorySize);
             break;
